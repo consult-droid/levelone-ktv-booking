@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LevelOne KTV Booking</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='75' font-size='75' fill='%23ff1493'>♪</text></svg>">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      color: #fff;
+      min-height: 100vh;
+      padding: 1rem;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 3rem;
+      padding-top: 2rem;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(120deg, #ff1493, #ff69b4);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-weight: 800;
+      letter-spacing: -1px;
+    }
+
+    .subtitle {
+      font-size: 1rem;
+      color: #aaa;
+      letter-spacing: 1px;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 20, 147, 0.2);
+      border-radius: 12px;
+      padding: 2rem;
+      margin-bottom: 1.5rem;
+      backdrop-filter: blur(10px);
+    }
+
+    .step-number {
+      display: inline-block;
+      width: 32px;
+      height: 32px;
+      background: #ff1493;
+      border-radius: 50%;
+      text-align: center;
+      line-height: 32px;
+      font-weight: bold;
+      margin-right: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    label {
+      display: block;
+      font-size: 0.9rem;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid rgba(255, 20, 147, 0.3);
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      border-radius: 6px;
+      font-size: 1rem;
+      transition: border 0.2s;
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: #ff1493;
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    input::placeholder {
+      color: #888;
+    }
+
+    .slots-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    .slot {
+      padding: 0.75rem;
+      border: 2px solid rgba(255, 20, 147, 0.3);
+      border-radius: 6px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 0.85rem;
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .slot.available:hover {
+      border-color: #ff1493;
+      background: rgba(255, 20, 147, 0.2);
+      transform: translateY(-2px);
+    }
+
+    .slot.booked {
+      opacity: 0.4;
+      cursor: not-allowed;
+      color: #888;
+    }
+
+    .slot.selected {
+      background: #ff1493;
+      border-color: #ff1493;
+      color: #fff;
+      font-weight: bold;
+    }
+
+    .price-display {
+      background: rgba(255, 20, 147, 0.1);
+      border-left: 3px solid #ff1493;
+      padding: 1rem;
+      border-radius: 6px;
+      margin-top: 1rem;
+    }
+
+    .price-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.5rem;
+      font-size: 0.95rem;
+    }
+
+    .price-total {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #ff69b4;
+      margin-top: 0.5rem;
+    }
+
+    button {
+      width: 100%;
+      padding: 1rem;
+      background: linear-gradient(120deg, #ff1493, #ff69b4);
+      border: none;
+      color: white;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(255, 20, 147, 0.4);
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .payment-section {
+      text-align: center;
+    }
+
+    .qr-display {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 12px;
+      margin: 1.5rem 0;
+      max-width: 300px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .qr-display img {
+      width: 100%;
+      max-width: 250px;
+    }
+
+    .payment-reference {
+      background: rgba(255, 20, 147, 0.2);
+      padding: 1rem;
+      border-radius: 8px;
+      margin: 1rem 0;
+      font-family: monospace;
+      font-size: 1.1rem;
+      word-break: break-all;
+    }
+
+    .payment-instructions {
+      text-align: left;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 1rem;
+      border-radius: 8px;
+      margin: 1rem 0;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+
+    .payment-instructions li {
+      margin-bottom: 0.75rem;
+    }
+
+    .file-upload {
+      position: relative;
+      overflow: hidden;
+      display: inline-block;
+      width: 100%;
+    }
+
+    .file-upload input[type=file] {
+      position: absolute;
+      left: -9999px;
+    }
+
+    .file-upload-label {
+      display: block;
+      padding: 1rem;
+      background: rgba(255, 20, 147, 0.2);
+      border: 2px dashed #ff1493;
+      border-radius: 8px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .file-upload-label:hover {
+      background: rgba(255, 20, 147, 0.3);
+    }
+
+    .file-name {
+      margin-top: 0.5rem;
+      font-size: 0.9rem;
+      color: #ff69b4;
+    }
+
+    .success-message {
+      background: rgba(76, 175, 80, 0.2);
+      border-left: 3px solid #4caf50;
+      padding: 1rem;
+      border-radius: 6px;
+      margin-top: 1rem;
+    }
+
+    .error-message {
+      background: rgba(244, 67, 54, 0.2);
+      border-left: 3px solid #f44336;
+      padding: 1rem;
+      border-radius: 6px;
+      margin-top: 1rem;
+      color: #ffcdd2;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.8);
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: #1a1a2e;
+      padding: 2rem;
+      border-radius: 12px;
+      max-width: 500px;
+      width: 90%;
+      border: 1px solid rgba(255, 20, 147, 0.3);
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 2rem;
+      cursor: pointer;
+      width: auto;
+      padding: 0;
+    }
+
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 1.8rem;
+      }
+
+      .card {
+        padding: 1.5rem;
+      }
+
+      .slots-grid {
+        grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+      }
+    }
+
+    .loading {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: #ff1493;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🎤 LevelOne KTV</h1>
+      <p class="subtitle">Book Your Private Karaoke Room</p>
+    </header>
+
+    <!-- Step 1: Customer Info -->
+    <div class="card" id="step1">
+      <div class="step-number">1</div>
+      <h2>Your Information</h2>
+      
+      <form id="customerForm">
+        <div class="form-group">
+          <label for="name">Name</label>
+          <input type="text" id="name" name="name" placeholder="Your full name" required>
+        </div>
+
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" placeholder="your.email@example.com" required>
+        </div>
+
+        <div class="form-group">
+          <label for="phone">Phone Number</label>
+          <input type="tel" id="phone" name="phone" placeholder="+63 9XX XXX XXXX" required>
+        </div>
+
+        <button type="button" onclick="goToRoomSelection()">Next: Select Room</button>
+      </form>
+    </div>
+
+    <!-- Step 2: Room & Time Selection -->
+    <div class="card hidden" id="step2">
+      <div class="step-number">2</div>
+      <h2>Select Room & Time</h2>
+
+      <div class="form-group">
+        <label for="room">Room</label>
+        <select id="room" onchange="onRoomChange()">
+          <option value="">Choose a room...</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="date">Date</label>
+        <input type="date" id="date" onchange="onDateChange()" required>
+      </div>
+
+      <div class="form-group">
+        <label>Available Time Slots</label>
+        <div id="slotsContainer" class="slots-grid"></div>
+      </div>
+
+      <div id="selectedSlots" class="form-group hidden">
+        <label>Selected Time Slots</label>
+        <div id="selectedSlotsList" style="background: rgba(255,20,147,0.1); padding: 1rem; border-radius: 6px; margin-top: 0.5rem;"></div>
+      </div>
+
+      <div class="price-display">
+        <div class="price-row">
+          <span>Hours selected:</span>
+          <span id="hourCount">0</span>
+        </div>
+        <div class="price-row">
+          <span>Rate per hour:</span>
+          <span>₱450</span>
+        </div>
+        <div class="price-total">Total: ₱<span id="totalPrice">0</span></div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem;">
+        <button type="button" onclick="backToCustomerInfo()">Back</button>
+        <button type="button" onclick="goToPayment()" id="proceedPaymentBtn" disabled>Proceed to Payment</button>
+      </div>
+    </div>
+
+    <!-- Step 3: Payment -->
+    <div class="card hidden" id="step3">
+      <div class="step-number">3</div>
+      <div class="payment-section">
+        <h2>Payment</h2>
+        
+        <div style="margin: 2rem 0;">
+          <p style="margin-bottom: 1rem;">Scan this QRPH QR code to pay</p>
+          <p style="font-size: 0.9rem; color: #aaa;">Amount: <strong>₱<span id="paymentAmount">0</span></strong></p>
+          <p style="font-size: 0.9rem; color: #aaa;">Reference: <strong id="paymentRef"></strong></p>
+        </div>
+
+        <div class="payment-reference">
+          📌 Booking ID: <strong id="bookingRef"></strong>
+        </div>
+
+        <div class="payment-instructions">
+          <strong>Payment Methods Available:</strong>
+          <ul style="list-style: inside; margin-top: 0.5rem;">
+            <li>💳 GCash - Scan QR or P2P transfer</li>
+            <li>🏦 Bank Transfer to payment account</li>
+          </ul>
+        </div>
+
+        <div style="margin: 1.5rem 0; padding: 1rem; background: rgba(255,255,255,0.05); border-radius: 8px;">
+          <p style="font-size: 0.9rem; margin-bottom: 1rem;"><strong>⚠️ Important:</strong> After paying, upload a screenshot of your payment confirmation to verify your booking.</p>
+        </div>
+
+        <div class="file-upload">
+          <input type="file" id="proofFile" accept="image/*" onchange="onFileSelected()">
+          <label for="proofFile" class="file-upload-label">
+            <span id="fileLabel">📸 Upload Payment Proof Screenshot</span>
+            <div class="file-name" id="fileName"></div>
+          </label>
+        </div>
+
+        <button type="button" id="submitProofBtn" onclick="submitPaymentProof()" disabled style="margin-top: 1rem;">
+          Submit Proof & Complete Booking
+        </button>
+
+        <div id="proofMessage"></div>
+
+        <button type="button" onclick="startOver()" style="margin-top: 1rem; background: #666;">Start New Booking</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+  <script>
+    const API_BASE = window.location.origin;
+    let selectedRoom = null;
+    let selectedDate = null;
+    let selectedStartHour = null;
+    let selectedEndHour = null;
+    let currentBookingId = null;
+    let availableSlots = [];
+
+    // Initialize with today's date
+    document.getElementById('date').valueAsDate = new Date();
+    document.getElementById('date').min = new Date().toISOString().split('T')[0];
+
+    // Load rooms
+    async function loadRooms() {
+      try {
+        const res = await fetch(`${API_BASE}/api/rooms`);
+        const rooms = await res.json();
+        const select = document.getElementById('room');
+        rooms.forEach(room => {
+          const option = document.createElement('option');
+          option.value = room.id;
+          option.textContent = room.name;
+          select.appendChild(option);
+        });
+      } catch (err) {
+        console.error('Failed to load rooms:', err);
+      }
+    }
+
+    async function onRoomChange() {
+      selectedRoom = document.getElementById('room').value;
+      if (selectedRoom) {
+        await loadSlots();
+      }
+    }
+
+    async function onDateChange() {
+      selectedDate = document.getElementById('date').value;
+      if (selectedRoom) {
+        await loadSlots();
+      }
+    }
+
+    async function loadSlots() {
+      if (!selectedRoom || !selectedDate) return;
+
+      try {
+        const res = await fetch(`${API_BASE}/api/available-slots/${selectedRoom}?date=${selectedDate}`);
+        availableSlots = await res.json();
+        renderSlots();
+      } catch (err) {
+        console.error('Failed to load slots:', err);
+      }
+    }
+
+    function renderSlots() {
+      const container = document.getElementById('slotsContainer');
+      container.innerHTML = '';
+
+      availableSlots.slots.forEach((slot, idx) => {
+        const div = document.createElement('div');
+        div.className = `slot ${slot.available ? 'available' : 'booked'}`;
+        div.textContent = slot.time;
+        
+        if (slot.available) {
+          div.onclick = () => selectTimeSlot(idx);
+          if (isSlotSelected(idx)) {
+            div.classList.add('selected');
+          }
+        }
+        container.appendChild(div);
+      });
+    }
+
+    function isSlotSelected(idx) {
+      if (selectedStartHour === null) return false;
+      const start = selectedStartHour;
+      const end = selectedEndHour !== null ? selectedEndHour : selectedStartHour;
+      return idx >= Math.min(start, end) && idx <= Math.max(start, end);
+    }
+
+    function selectTimeSlot(idx) {
+      if (!availableSlots.slots[idx].available) return;
+
+      if (selectedStartHour === null) {
+        selectedStartHour = idx;
+        selectedEndHour = idx;
+      } else {
+        if (idx === selectedStartHour && idx === selectedEndHour) {
+          // Deselect
+          selectedStartHour = null;
+          selectedEndHour = null;
+        } else if (idx < selectedStartHour) {
+          selectedStartHour = idx;
+        } else if (idx === selectedEndHour && selectedEndHour < selectedStartHour) {
+          selectedStartHour = idx;
+        } else if (idx > selectedEndHour) {
+          selectedEndHour = idx;
+        } else if (idx > selectedStartHour && idx < selectedEndHour) {
+          // Toggle range
+          if (idx - selectedStartHour <= selectedEndHour - idx) {
+            selectedEndHour = idx - 1;
+          } else {
+            selectedStartHour = idx + 1;
+          }
+        }
+      }
+
+      updatePrice();
+      renderSlots();
+    }
+
+    function updatePrice() {
+      if (selectedStartHour === null) {
+        document.getElementById('hourCount').textContent = '0';
+        document.getElementById('totalPrice').textContent = '0';
+        document.getElementById('selectedSlots').classList.add('hidden');
+        document.getElementById('proceedPaymentBtn').disabled = true;
+        return;
+      }
+
+      const start = Math.min(selectedStartHour, selectedEndHour);
+      const end = Math.max(selectedStartHour, selectedEndHour);
+      const hours = end - start + 1;
+      const total = hours * 450;
+
+      document.getElementById('hourCount').textContent = hours;
+      document.getElementById('totalPrice').textContent = total;
+
+      const slotsList = document.getElementById('selectedSlotsList');
+      const startTime = availableSlots.slots[start].time;
+      const endTime = availableSlots.slots[end + 1]?.time || '24:00';
+      slotsList.textContent = `${startTime} to ${endTime} (${hours} hour${hours > 1 ? 's' : ''})`;
+
+      document.getElementById('selectedSlots').classList.remove('hidden');
+      document.getElementById('proceedPaymentBtn').disabled = false;
+    }
+
+    function goToRoomSelection() {
+      const name = document.getElementById('name').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const phone = document.getElementById('phone').value.trim();
+
+      if (!name || !email || !phone) {
+        alert('Please fill in all fields');
+        return;
+      }
+
+      document.getElementById('step1').classList.add('hidden');
+      document.getElementById('step2').classList.remove('hidden');
+      
+      if (!selectedDate) {
+        loadSlots();
+      }
+    }
+
+    function backToCustomerInfo() {
+      document.getElementById('step2').classList.add('hidden');
+      document.getElementById('step1').classList.remove('hidden');
+    }
+
+    async function goToPayment() {
+      if (selectedStartHour === null) {
+        alert('Please select time slots');
+        return;
+      }
+
+      const name = document.getElementById('name').value;
+      const email = document.getElementById('email').value;
+      const phone = document.getElementById('phone').value;
+
+      const start = Math.min(selectedStartHour, selectedEndHour);
+      const end = Math.max(selectedStartHour, selectedEndHour) + 1;
+
+      const startDateTime = new Date(`${selectedDate}T${availableSlots.slots[start].time}:00`).toISOString();
+      const endDateTime = new Date(`${selectedDate}T${availableSlots.slots[end]?.time || '24:00'}:00`).toISOString();
+
+      try {
+        const res = await fetch(`${API_BASE}/api/create-booking`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            roomId: selectedRoom,
+            customerName: name,
+            customerEmail: email,
+            customerPhone: phone,
+            startTime: startDateTime,
+            endTime: endDateTime
+          })
+        });
+
+        if (!res.ok) {
+          const err = await res.json();
+          alert('Error: ' + err.error);
+          return;
+        }
+
+        const booking = await res.json();
+        currentBookingId = booking.bookingId;
+
+        // Generate and display QR code (using a placeholder - replace with actual QRPH QR)
+        document.getElementById('bookingRef').textContent = booking.bookingId;
+        document.getElementById('paymentRef').textContent = booking.paymentNote;
+        document.getElementById('paymentAmount').textContent = booking.totalAmount;
+
+        document.getElementById('step2').classList.add('hidden');
+        document.getElementById('step3').classList.remove('hidden');
+      } catch (err) {
+        alert('Error creating booking: ' + err.message);
+      }
+    }
+
+    function onFileSelected() {
+      const file = document.getElementById('proofFile').files[0];
+      if (file) {
+        document.getElementById('fileName').textContent = `✓ ${file.name}`;
+        document.getElementById('submitProofBtn').disabled = false;
+      }
+    }
+
+    async function submitPaymentProof() {
+      const file = document.getElementById('proofFile').files[0];
+      if (!file) {
+        alert('Please select a file');
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('screenshot', file);
+
+      try {
+        document.getElementById('submitProofBtn').disabled = true;
+        document.getElementById('submitProofBtn').innerHTML = '<span class="loading"></span> Uploading...';
+
+        const res = await fetch(`${API_BASE}/api/upload-proof/${currentBookingId}`, {
+          method: 'POST',
+          body: formData
+        });
+
+        if (!res.ok) {
+          throw new Error('Upload failed');
+        }
+
+        const result = await res.json();
+
+        document.getElementById('proofMessage').innerHTML = `
+          <div class="success-message">
+            ✓ <strong>Payment Proof Received!</strong><br>
+            Your booking ID: <strong>${currentBookingId}</strong><br>
+            Our staff will verify your payment and send you a confirmation email shortly.
+          </div>
+        `;
+
+        setTimeout(() => {
+          startOver();
+        }, 3000);
+      } catch (err) {
+        document.getElementById('proofMessage').innerHTML = `
+          <div class="error-message">
+            ✗ Error uploading proof: ${err.message}
+          </div>
+        `;
+        document.getElementById('submitProofBtn').disabled = false;
+        document.getElementById('submitProofBtn').innerHTML = 'Submit Proof & Complete Booking';
+      }
+    }
+
+    function startOver() {
+      selectedRoom = null;
+      selectedDate = null;
+      selectedStartHour = null;
+      selectedEndHour = null;
+      currentBookingId = null;
+
+      document.getElementById('step1').classList.remove('hidden');
+      document.getElementById('step2').classList.add('hidden');
+      document.getElementById('step3').classList.add('hidden');
+
+      document.getElementById('customerForm').reset();
+      document.getElementById('room').value = '';
+      document.getElementById('proofFile').value = '';
+      document.getElementById('fileName').textContent = '';
+      document.getElementById('proofMessage').innerHTML = '';
+      document.getElementById('submitProofBtn').disabled = true;
+      document.getElementById('submitProofBtn').innerHTML = 'Submit Proof & Complete Booking';
+
+      document.getElementById('date').valueAsDate = new Date();
+      document.getElementById('date').min = new Date().toISOString().split('T')[0];
+    }
+
+    // Initialize
+    loadRooms();
+  </script>
+</body>
+</html>
