@@ -147,10 +147,10 @@ app.get('/api/available-slots/:roomId', (req, res) => {
   const startOfDay = new Date(`${date}T00:00:00`).toISOString();
   const endOfDay = new Date(`${date}T23:59:59`).toISOString();
 
-  // Get all bookings for this room on this date
+  // Get all bookings for this room on this date (both pending AND active)
   db.all(
     `SELECT startTime, endTime FROM bookings 
-     WHERE roomId = ? AND status = 'active' 
+     WHERE roomId = ? AND status IN ('active', 'pending')
      AND date(startTime) = ?
      ORDER BY startTime`,
     [roomId, date],
