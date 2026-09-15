@@ -274,13 +274,15 @@ app.post('/api/upload-proof/:bookingId', upload.single('screenshot'), (req, res)
     // Rename file
     const fileName = `${bookingId}-${Date.now()}.jpg`;
     const filePath = path.join(uploadsDir, fileName);
+    const relativePath = path.join('uploads', 'proofs', fileName);
+    
     fs.renameSync(req.file.path, filePath);
 
-    // Save proof record
+    // Save proof record with RELATIVE path
     const proofId = `PROOF-${Date.now()}`;
     db.run(
       `INSERT INTO paymentProofs (id, bookingId, screenshotPath, uploadedAt) VALUES (?, ?, ?, ?)`,
-      [proofId, bookingId, filePath, new Date().toISOString()],
+      [proofId, bookingId, relativePath, new Date().toISOString()],
       (err) => {
         if (err) {
           return res.status(500).json({ error: 'Failed to save proof' });
