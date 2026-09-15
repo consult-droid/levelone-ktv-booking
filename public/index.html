@@ -197,19 +197,38 @@
       text-align: center;
     }
 
-    .qr-display {
+    .qr-container {
       background: white;
       padding: 1.5rem;
       border-radius: 12px;
-      margin: 1.5rem 0;
-      max-width: 300px;
-      margin-left: auto;
-      margin-right: auto;
+      margin: 1.5rem auto;
+      max-width: 350px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
     }
 
-    .qr-display img {
+    .qr-container img {
       width: 100%;
-      max-width: 250px;
+      max-width: 300px;
+      border-radius: 8px;
+      display: block;
+    }
+
+    .qr-label {
+      margin-top: 1rem;
+      font-size: 0.85rem;
+      color: #333;
+    }
+
+    .qr-label strong {
+      display: block;
+      font-size: 0.9rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .qr-tagline {
+      font-size: 0.75rem;
+      color: #666;
+      margin-top: 0.25rem;
     }
 
     .payment-reference {
@@ -286,52 +305,9 @@
       color: #ffcdd2;
     }
 
-    .modal {
-      display: none;
-      position: fixed;
-      z-index: 1000;
-      left: 0;
-      top: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.8);
-      align-items: center;
-      justify-content: center;
-    }
-
-    .modal.active {
-      display: flex;
-    }
-
-    .modal-content {
-      background: #1a1a2e;
-      padding: 2rem;
-      border-radius: 12px;
-      max-width: 500px;
-      width: 90%;
-      border: 1px solid rgba(255, 20, 147, 0.3);
-    }
-
-    .modal-close {
-      position: absolute;
-      top: 1rem;
-      right: 1rem;
-      background: none;
-      border: none;
-      color: #fff;
-      font-size: 2rem;
-      cursor: pointer;
-      width: auto;
-      padding: 0;
-    }
-
     @media (max-width: 600px) {
       h1 {
         font-size: 1.8rem;
-      }
-
-      .card {
-        padding: 1.5rem;
       }
 
       .slots-grid {
@@ -437,16 +413,18 @@
       <div class="payment-section">
         <h2>Payment</h2>
         
-        <div style="margin: 2rem 0; text-align: center;">
+        <div style="margin: 2rem 0;">
           <p style="margin-bottom: 1rem;"><strong>Scan this QRPH QR code to pay</strong></p>
           <p style="font-size: 0.9rem; color: #aaa;">Amount: <strong>₱<span id="paymentAmount">0</span></strong></p>
           <p style="font-size: 0.9rem; color: #aaa; margin-bottom: 1.5rem;">Reference: <strong id="paymentRef"></strong></p>
           
           <!-- LevelOne QRPH QR Code -->
-          <div style="background: white; padding: 1.5rem; border-radius: 12px; margin: 1.5rem auto; max-width: 350px; box-shadow: 0 4px 12px rgba(0,0,0,0.2);">
-            <img src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAMCAgMCAgMDAwMEAwMEBQgFBQQFBQgHBwcGBwcHBwcGBwcICQkJCAgKCAcHCg0KCQgMDAwMCQoMCQwMCQj/2wBDAQMEBAUEBQkFBQkMCAYIDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMCQj/wAARCAD6APoDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD9/KKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigD/2Q==" alt="LevelOne QRPH Payment QR" style="width: 100%; max-width: 280px; border-radius: 8px;">
-            <p style="margin-top: 1rem; font-size: 0.85rem; color: #333;"><strong>LevelOne Cafe Lucena</strong></p>
-            <p style="font-size: 0.75rem; color: #666;">Basta kaya i-scan pwede yan!</p>
+          <div class="qr-container">
+            <img src="qrph-qr.jpg" alt="LevelOne QRPH Payment QR Code" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 300 300%22%3E%3Crect fill=%22%23f5f5f5%22 width=%22300%22 height=%22300%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%23999%22 font-family=%22Arial%22 font-size=%2216%22%3EQR Code%3C/text%3E%3Ctext x=%2250%25%22 y=%2260%25%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%23999%22 font-family=%22Arial%22 font-size=%2214%22%3E(Loading...)%3C/text%3E%3C/svg%3E'">
+            <div class="qr-label">
+              <strong>LevelOne Cafe Lucena</strong>
+              <div class="qr-tagline">Basta kaya i-scan pwede yan!</div>
+            </div>
           </div>
         </div>
 
@@ -576,7 +554,6 @@
         selectedEndHour = idx;
       } else {
         if (idx === selectedStartHour && idx === selectedEndHour) {
-          // Deselect
           selectedStartHour = null;
           selectedEndHour = null;
         } else if (idx < selectedStartHour) {
@@ -586,7 +563,6 @@
         } else if (idx > selectedEndHour) {
           selectedEndHour = idx;
         } else if (idx > selectedStartHour && idx < selectedEndHour) {
-          // Toggle range
           if (idx - selectedStartHour <= selectedEndHour - idx) {
             selectedEndHour = idx - 1;
           } else {
@@ -687,7 +663,6 @@
         const booking = await res.json();
         currentBookingId = booking.bookingId;
 
-        // Generate and display QR code (using a placeholder - replace with actual QRPH QR)
         document.getElementById('bookingRef').textContent = booking.bookingId;
         document.getElementById('paymentRef').textContent = booking.paymentNote;
         document.getElementById('paymentAmount').textContent = booking.totalAmount;
