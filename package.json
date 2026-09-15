@@ -1,0 +1,28 @@
+{
+  "name": "levelone-ktv-booking",
+  "version": "1.0.0",
+  "description": "QR code-based KTV room booking system for LevelOne cafe",
+  "main": "levelone-server.js",
+  "scripts": {
+    "start": "node levelone-server.js",
+    "dev": "nodemon levelone-server.js"
+  },
+  "keywords": [
+    "ktv",
+    "booking",
+    "philippines",
+    "gcash",
+    "qrph"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "sqlite3": "^5.1.6",
+    "nodemailer": "^6.9.4",
+    "multer": "^1.4.5-lts.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}
