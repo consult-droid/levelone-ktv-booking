@@ -249,6 +249,12 @@ app.post('/api/upload-proof/:bookingId', upload.single('screenshot'), (req, res)
     return res.status(400).json({ error: 'No file uploaded' });
   }
 
+  // Create uploads/proofs directory if it doesn't exist
+  const uploadsDir = path.join(__dirname, 'uploads', 'proofs');
+  if (!fs.existsSync(uploadsDir)) {
+    fs.mkdirSync(uploadsDir, { recursive: true });
+  }
+
   // Check if booking exists
   db.get('SELECT * FROM bookings WHERE id = ?', [bookingId], (err, booking) => {
     if (err || !booking) {
@@ -257,7 +263,7 @@ app.post('/api/upload-proof/:bookingId', upload.single('screenshot'), (req, res)
 
     // Rename file
     const fileName = `${bookingId}-${Date.now()}.jpg`;
-    const filePath = path.join('uploads/proofs', fileName);
+    const filePath = path.join(uploadsDir, fileName);
     fs.renameSync(req.file.path, filePath);
 
     // Save proof record
