@@ -613,8 +613,12 @@
                 <span class="value">${booking.roomName}</span>
               </div>
               <div class="booking-info-row">
+                <span class="label">Date</span>
+                <span class="value">${new Date(booking.startTime).toLocaleDateString()}</span>
+              </div>
+              <div class="booking-info-row">
                 <span class="label">Time</span>
-                <span class="value">${new Date(booking.startTime).toLocaleString()} - ${new Date(booking.endTime).toLocaleTimeString()}</span>
+                <span class="value">${new Date(booking.startTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} - ${new Date(booking.endTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
               </div>
               <div class="booking-info-row">
                 <span class="label">Customer</span>
@@ -669,7 +673,7 @@
             ${bookings.length === 0 ? '<p style="color: #666; font-size: 0.9rem;">No bookings</p>' : ''}
             ${bookings.map(b => `
               <div class="time-block">
-                <div class="time">${new Date(b.startTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
+                <div class="time">${new Date(b.startTime).toLocaleDateString()} ${new Date(b.startTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
                 <div class="customer">👤 ${b.customerName}</div>
               </div>
             `).join('')}
