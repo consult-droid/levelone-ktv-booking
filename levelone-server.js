@@ -483,7 +483,16 @@ app.get('/api/staff/proof/:bookingId', (req, res) => {
       if (err || !row) {
         return res.status(404).json({ error: 'Proof not found' });
       }
-      res.sendFile(path.resolve(row.screenshotPath));
+      
+      // Construct full file path
+      const filePath = path.join(__dirname, row.screenshotPath);
+      
+      // Check if file exists
+      if (!fs.existsSync(filePath)) {
+        return res.status(404).json({ error: 'Proof file not found' });
+      }
+      
+      res.sendFile(filePath);
     }
   );
 });
