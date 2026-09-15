@@ -641,7 +641,7 @@
             <div class="proof-section">
               <p style="margin-bottom: 1rem;"><strong>Payment Proof Screenshot</strong></p>
               ${booking.screenshotPath ? `
-                <img src="${API_BASE}/api/staff/proof/${booking.id}" alt="Payment proof" class="proof-image" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 300 200%22%3E%3Crect fill=%22%23333%22 width=%22300%22 height=%22200%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%23999%22 font-family=%22monospace%22%3EImage Not Found%3C/text%3E%3C/svg%3E'">
+                <img src="/${booking.screenshotPath}" alt="Payment proof" class="proof-image" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 300 200%22%3E%3Crect fill=%22%23333%22 width=%22300%22 height=%22200%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%23999%22 font-family=%22monospace%22%3EImage Not Found%3C/text%3E%3C/svg%3E'">
               ` : '<p style="color: #aaa;">No image available</p>'}
               
               <div class="action-buttons">
