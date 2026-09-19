@@ -52,6 +52,18 @@ db.serialize(() => {
     FOREIGN KEY (bookingId) REFERENCES bookings(id)
   )`);
 
+  // Walk-in blocks table (staff blocks time for walk-in customers)
+  db.run(`CREATE TABLE IF NOT EXISTS walkInBlocks (
+    id TEXT PRIMARY KEY,
+    roomId INTEGER NOT NULL,
+    startTime TEXT NOT NULL,
+    endTime TEXT NOT NULL,
+    createdBy TEXT NOT NULL,
+    createdAt TEXT NOT NULL,
+    note TEXT,
+    FOREIGN KEY (roomId) REFERENCES rooms(id)
+  )`);
+
   // Staff users table
   db.run(`CREATE TABLE IF NOT EXISTS staffUsers (
     id TEXT PRIMARY KEY,
@@ -150,38 +162,53 @@ app.get('/api/available-slots/:roomId', (req, res) => {
   const startOfDay = new Date(`${date}T00:00:00`).toISOString();
   const endOfDay = new Date(`${date}T23:59:59`).toISOString();
 
-  // Get all bookings for this room on this date (both pending AND active)
+  // Get all bookings + walk-in blocks for this room on this date
   db.all(
     `SELECT startTime, endTime FROM bookings 
      WHERE roomId = ? AND status IN ('active', 'pending')
      AND date(startTime) = ?
      ORDER BY startTime`,
     [roomId, date],
-    (err, rows) => {
+    (err, bookings) => {
       if (err) {
         return res.status(500).json({ error: 'Database error' });
       }
 
-      // Generate all possible 1-hour slots
-      const slots = [];
-      for (let hour = 10; hour < 24; hour++) {
-        const slotStart = new Date(`${date}T${hour.toString().padStart(2, '0')}:00:00`);
-        const slotEnd = new Date(`${date}T${(hour + 1).toString().padStart(2, '0')}:00:00`);
-        
-        const isBooked = rows.some(booking => {
-          const bStart = new Date(booking.startTime);
-          const bEnd = new Date(booking.endTime);
-          return slotStart < bEnd && slotEnd > bStart;
-        });
+      // Also get walk-in blocks for this date
+      db.all(
+        `SELECT startTime, endTime FROM walkInBlocks 
+         WHERE roomId = ? AND date(startTime) = ?
+         ORDER BY startTime`,
+        [roomId, date],
+        (err, walkIns) => {
+          if (err) {
+            return res.status(500).json({ error: 'Database error' });
+          }
 
-        slots.push({
-          hour,
-          time: `${hour.toString().padStart(2, '0')}:00`,
-          available: !isBooked
-        });
-      }
+          const allBlocks = bookings.concat(walkIns || []);
 
-      res.json({ date, room: roomId, slots });
+          // Generate all possible 1-hour slots
+          const slots = [];
+          for (let hour = 10; hour < 24; hour++) {
+            const slotStart = new Date(`${date}T${hour.toString().padStart(2, '0')}:00:00`);
+            const slotEnd = new Date(`${date}T${(hour + 1).toString().padStart(2, '0')}:00:00`);
+            
+            const isBooked = allBlocks.some(block => {
+              const bStart = new Date(block.startTime);
+              const bEnd = new Date(block.endTime);
+              return slotStart < bEnd && slotEnd > bStart;
+            });
+
+            slots.push({
+              hour,
+              time: `${hour.toString().padStart(2, '0')}:00`,
+              available: !isBooked
+            });
+          }
+
+          res.json({ date, room: roomId, slots });
+        }
+      );
     }
   );
 });
@@ -205,6 +232,17 @@ app.post('/api/create-booking', express.json(), (req, res) => {
 
   const start = new Date(startTime);
   const end = new Date(endTime);
+  
+  // Validate: booking cannot be more than 60 days in advance
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const maxDate = new Date(today);
+  maxDate.setDate(maxDate.getDate() + 60);
+  
+  if (start > maxDate) {
+    return res.status(400).json({ error: 'Cannot book more than 60 days in advance. Max date is ' + maxDate.toLocaleDateString() });
+  }
+  
   const totalHours = Math.round((end - start) / (1000 * 60 * 60));
 
   if (totalHours <= 0 || totalHours > 8) {
@@ -494,6 +532,80 @@ app.get('/api/staff/proof/:bookingId', (req, res) => {
         imageUrl: `/${row.screenshotPath}`,
         path: row.screenshotPath
       });
+    }
+  );
+});
+
+// ============ WALK-IN MANAGEMENT (NEW V2.0) ============
+
+// Create walk-in block (staff only)
+app.post('/api/staff/walkin-blocks', express.json(), (req, res) => {
+  const { roomId, startTime, endTime, note } = req.body;
+  const token = req.headers.authorization?.split(' ')[1];
+  
+  if (!token) return res.status(401).json({ error: 'Unauthorized' });
+  
+  if (!roomId || !startTime || !endTime) {
+    return res.status(400).json({ error: 'Missing required fields' });
+  }
+
+  const walkInId = `WALKIN-${new Date().toISOString().split('T')[0].replace(/-/g, '')}-${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
+  
+  db.run(
+    `INSERT INTO walkInBlocks (id, roomId, startTime, endTime, createdBy, createdAt, note) 
+     VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    [walkInId, roomId, startTime, endTime, 'admin', new Date().toISOString(), note],
+    function(err) {
+      if (err) {
+        return res.status(500).json({ error: 'Failed to create walk-in block' });
+      }
+      res.json({ walkInId, status: 'created' });
+    }
+  );
+});
+
+// Get walk-in blocks for a date
+app.get('/api/staff/walkin-blocks', (req, res) => {
+  const { date } = req.query;
+  const token = req.headers.authorization?.split(' ')[1];
+  
+  if (!token) return res.status(401).json({ error: 'Unauthorized' });
+  
+  if (!date) {
+    return res.status(400).json({ error: 'Date required' });
+  }
+
+  db.all(
+    `SELECT w.id, w.roomId, r.name as roomName, w.startTime, w.endTime, w.createdBy, w.createdAt, w.note 
+     FROM walkInBlocks w
+     JOIN rooms r ON w.roomId = r.id
+     WHERE date(w.startTime) = ?
+     ORDER BY w.startTime`,
+    [date],
+    (err, rows) => {
+      if (err) {
+        return res.status(500).json({ error: 'Database error' });
+      }
+      res.json(rows || []);
+    }
+  );
+});
+
+// Delete walk-in block
+app.delete('/api/staff/walkin-blocks/:walkInId', (req, res) => {
+  const { walkInId } = req.params;
+  const token = req.headers.authorization?.split(' ')[1];
+  
+  if (!token) return res.status(401).json({ error: 'Unauthorized' });
+
+  db.run(
+    `DELETE FROM walkInBlocks WHERE id = ?`,
+    [walkInId],
+    function(err) {
+      if (err) {
+        return res.status(500).json({ error: 'Failed to delete walk-in block' });
+      }
+      res.json({ success: true });
     }
   );
 });
